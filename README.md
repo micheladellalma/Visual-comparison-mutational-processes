@@ -1,6 +1,8 @@
 # Visual-comparison-mutational-processes
 R package for visual comparison of mutational processes in a set of tumors
 
+Programming language: R
+
 R package compliant with Bioconductor requirements that provide the following functionality.
 
 For a given set of tumor genomes (defined by the somatic single nucleotide mutations from a file in the mutation position format/MPF) the package shall:
