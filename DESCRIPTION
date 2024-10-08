@@ -1,0 +1,31 @@
+Package: VisualComparisonMutationsSetTumors
+Type: Package
+Title: Visual comparison of mutational processes in a set of tumor genomes
+Version: 0.99.0
+Description: Given a list of tumor samples and a list of signatures, after decomposition of 
+            the tumor genomes into mutational signatures, preparation of the matrix  with 
+            signatures as rows and columns as genomes for heatmap visualization. The package 
+            contains initial functionality imported from  an existing package, important for 
+            the computation of the exposures, and additional functionalities aimed to prepare 
+            the data for visualization.
+Authors@R: person("Michela", "Dell'Alma", email = "micheladellalma@gmail.com",
+           role = c("aut", "cre"))
+Date: 08/27/20
+Depends: R(>= 3.6)
+Imports: 
+    BSgenome.Hsapiens.UCSC.hg19,
+    decompTumor2Sig,
+    stats 
+Suggests:
+    BiocStyle, 
+    knitr,
+    markdown,
+    rmarkdown,
+    testthat
+VignetteBuilder: knitr
+biocViews: Software, SNP, GenomicVariation, SomaticMutation, BiomedicalInformatics, Genetics,
+    BiologicalQuestion, StatisticalMethod
+Encoding: UTF-8
+LazyData: true
+License: GPL-2
+RoxygenNote: 7.1.1
