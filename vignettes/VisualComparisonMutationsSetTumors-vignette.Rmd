@@ -1,0 +1,193 @@
+---
+title: "Introduction to visualComparisonMutationsSetTumors"
+author: 
+- name: "Michela Dell'Alma"
+    email: micheladellalma@gmail.com or michela.dellalma@polimi.it
+date: "r Sys.Date()"
+vignette: >
+    %\VignetteIndexEntry{Introduction to visualComparisonMutationsSetTumors}
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteEncoding{UTF-8}
+output:
+    BiocStyle::html_document
+---
+
+```{r style, echo = FALSE, results = 'asis'}
+library(BiocStyle)
+```
+
+```{r, echo = FALSE}
+library(knitr)
+```
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+    collapse = TRUE,
+    comment = "#>"
+)
+```
+
+```{r setup}
+library(VisualComparisonMutationsSetTumors)
+```
+
+# Introduction
+
+The R package **visualComparisonMutationsSetTumors** has been 
+developed to display the contribution of each mutational 
+signatures to the load of somatic mutations observed in a tumor. 
+
+## Papers / how to cite
+
+> Krüger S, Piro RM (2019) decompTumor2Sig: Identification of mutational
+signatures active in individual tumors. *BMC Bioinformatics*
+**20**(Suppl 4):152.
+
+> Krüger S, Piro RM (2017) Identification of mutational signatures active in
+individual tumors. *PeerJ Preprints* **5**:e3257v1 (Proceedings of the NETTAB
+2017 Workshop on Methods, Tools \& Platforms for Personalized Medicine in the
+Big Data Era, October 16-18, 2017 in Palermo, Italy).
+
+# Installing and loading the package {#installation}
+
+## Installation
+
+### Bioconductor
+
+**visualComparisonMutationsSetTumors** requires a Bioconductor R package to be 
+installed.Dependencies are usually handed automatically, when installing the 
+package using the following commands:
+
+
+```
+install.packages("BiocManager")
+BiocManager::install("visualComparisonMutationsSetTumors")
+```
+[NOTE: Ignore the first line if you already have installed the
+`r CRANpkg("BiocManager")`.]
+
+# Input data {#input}
+
+**visualComparisonMutationsSetTumors"** works with two kinds of input data:
+
+i) a set of given mutational signatures, and
+ii) a set of somatic mutations (single nucleotide variants) observed in a tumor
+genome.
+
+
+## From an MPF file containing the tumor genomes and a file of signatures, 
+results exposure vectors for each tumor genome
+
+The function groups together different functionalities from the package 
+decompTumor2Sig.
+
+In particular the inputs of the function are an MPF file (somatic mutations) 
+composed by five columns containing
+
+1. the name of the sample (or tumor ID); 
+1. the chromosome name; 
+1. the position on the chromosome; 
+1. the reference base at that position (A, C, G, or T); 
+1. the alternate or variant base (A, C, G, or T).
+
+and the other input are Alexandrov signatures, in particular
+Alexandrov signatures are specified in the format used at the
+COSMIC Mutational Signatures website for signatures version 2 (March 2015,
+see <http://cancer.sanger.ac.uk/cosmic/signatures_v2> -> "Download signatures").
+
+Example for version 2:
+
+```
+Substitution Type  Trinucleotide  Somatic Mutation Type  Signature 1     ...
+C>A                ACA            A[C>A]A                0.011098326166  ...
+C>A                ACC            A[C>A]C                0.009149340734  ...
+C>A                ACG            A[C>A]G                0.001490070468  ...
+C>A                ACT            A[C>A]T                0.006233885236  ...
+...
+T>G                TTG            T[T>G]G                0.002031076880  ...
+T>G                TTT            T[T>G]T                0.004030128160  ...
+```
+
+
+The function exploits the function convertAlexandrov2Shiraishi 
+to Alexandrov version 2 signatures in Shiraishi and finally uses 
+the core function of the decompTumor2Sig package: decomposeTumorGenomes. 
+
+The result will be a vector of weights/contributions (or "exposures") 
+which indicate the fractions or percentages of somatic mutations which 
+can likely be attributed to the given signatures.
+
+Example:
+
+```{r}
+sigfile <- system.file("extdata",
+            paste0("signatures.Rdata"),
+            package="VisualComparisonMutationsSetTumors")
+genomes_file <- system.file("extdata",
+                paste0("Nik-Zainal_PMID_22608084-MPF.Rdata"),
+                package="VisualComparisonMutationsSetTumors")
+
+exposure_vector <- exposureVector(sigfile, genomes_file)
+```
+
+
+## Creating the list of vectors into a list of matrices
+
+The input is a list of vectors composed by the tumor genomes each of 
+which with a vector composed by the contributions of the signatures 
+(output of the decomposeTumorGenomes function). The function converts 
+the list of vectors into list of matrices.
+
+We can run the following command ...
+
+```{r}
+exposure_matrix <- exposureMatrix(exposure_vector)
+```
+
+## Creating an empty matrix
+
+Given the list of matrices, the function creates an empty matrix 
+with number of rows equal to the number of signatures and number 
+of columns equal to the number 
+of tumor genomes.
+
+Example:
+
+```{r}
+matrix_empty <- createEmptyMatrix(exposure_matrix)
+```
+
+## Filling matrix 
+
+Given the empty matrix and the list of matrices object, the function 
+fills the empty matrix in particular each matrix of the list fills the 
+columns of the matrix.
+
+We can run the following command:
+
+```{r}
+matrix_filled <- fillMatrix(matrix_empty, exposure_matrix)
+```
+
+## Giving row and column names to the matrix
+
+The function takes as input the filled matrix and the two object from
+which take the names for the matrix, the names of the signatures are 
+taken as row names and the names of the tumor genomes as column names.
+
+Example:
+
+```{r}
+matrix_named <- giveNamesMatrix(matrix_filled, exposure_vector)
+```
+
+## Creating an heatmap
+
+The function takes as input the filled and named matrix that has as 
+rows the signatures and as columns the tumor genomes.
+
+Example:
+
+```{r}
+heatMap(matrix_named)
+```
